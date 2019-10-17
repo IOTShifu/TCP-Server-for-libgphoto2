@@ -3,7 +3,7 @@
 
   When I started using libgphoto2 the main problem was to access it remotely and develop a remote control for my DSLR camera. It works well with gphoto2 (user interface for the libgphoto2) but the problem to solve was that accessing those commands over the wire remotely. With TCP server implementation, it can be done easly from any client implementation like code Java, Android App, IOS App or even from other CPP client code.
 
-Try it out in your project and make it more stable and features reach so the remote photogrpahy will become easy for all the photographers.
+Try it out in your project and make it more stable and feature reach so the remote photogrpahy will become easy for all the photographers.
 
 
 ## Basics
