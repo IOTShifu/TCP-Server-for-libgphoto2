@@ -65,10 +65,108 @@ struct PtpPacket{
 All the commands received by the command server will be in this format. Client has to build this struct (Dont worry, languages like Java,C# has option to form a Byte stream)
 
 
+e.g.  JAVA Code to set this packet on the client side:
+
+```
+ private static byte[] setCommunicationPacket(short packet_command,
+                                                 short widget_type,
+                                                 String widget_id,
+                                                 String widget_value)
+    {
+
+        int size = 2; //Size of Packet Command
+
+        //Calcuate Size requried for the packet to send, Min 2 is required to send command
+        if(widget_type != Constants.EMPTY)  size+=2;
+        if(widget_id != null ){
+            size+=50;
+            if(widget_value != null) { //if no widget id provided then there will be no widget value for sure, but only widgegt id can be provided and hence this conditon is inside first one
+                size+=50;
+            }
+        }
+
+        ByteBuffer c = ByteBuffer.allocate(size); //We got our size
 
 
+        c.putShort(0,(short)packet_command); //Sure that this value will always be there
+
+        if(widget_type != Constants.EMPTY)
+            c.putShort(2,(short)widget_type);
+
+        if(widget_id != null ) {
+            c.position(4);  //Fixed size 50 ( 4 to 53)
+            byte[] byteArrW_id = new byte[50];
+            byteArrW_id = widget_id.getBytes();
+            c.put(byteArrW_id);
+
+            if(widget_value != null) {
+                c.position(54);  //Fixed size 50  (54 to 104)
+                byte[] byteArrW_val = new byte[50];
+                byteArrW_val = widget_value.getBytes();
+                c.put(byteArrW_val);
+            }
+
+        }
 
 
+        byte[] returnVal = c.array();
 
-  
-  
+        return returnVal;
+
+    }
+```
+
+### One more example of how client code in JAVA can be written to fire a basic command i.e. Get Connected Camera List
+ 
+```
+public static final short GET_CAMERAS_LIST   = 0x0902;
+public String GetCameraList()
+    {
+
+        String strCamName="No Camera Detected!"; //In case of failure
+
+        byte[] cameraListRequestBytes = setCommunicationPacket(Constants.GET_CAMERAS_LIST,
+                                                               Constants.EMPTY,
+                                                       null,
+                                                    null);
+
+
+        try {
+            writeToServerSocket(cameraListRequestBytes);
+        }catch(Exception e){
+            return strCamName;
+        }
+
+        ///Read response from the server on above command
+        byte[] response;
+        try {
+            response = readBytes(200); //Cam name max len is 50 X we would get max 4 cameras connected: hence 200
+        }catch(Exception e){
+            return strCamName;
+        }
+
+        strCamName = new String(response);
+
+        return strCamName.trim();
+
+    }
+```
+
+### Or the most exciting one, i.e. Capture Image
+```
+public static final short CAPTURE_IMAGE    = 0x0002;
+public void CaptureImage() {
+
+
+        byte[] captureRequestBytes = setCommunicationPacket(Constants.CAPTURE_IMAGE,
+                Constants.EMPTY,
+                null,
+                null);
+
+        try {
+            writeToServerSocket(captureRequestBytes);
+        } catch (Exception e) {
+        }
+
+    }
+```
